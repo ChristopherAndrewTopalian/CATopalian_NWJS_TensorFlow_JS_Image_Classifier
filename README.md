@@ -20,6 +20,8 @@ Full Instructions on Running our app here: https://github.com/ChristopherAndrewT
 
 ---
 
+Video: https://www.youtube.com/watch?v=sw3dFA14aW8
+
 ![001](CATopalian_NWJS_TensorFlow_JS_Image_Classifier/v003/src/media/textures/screenshots/001.webp)
 
 ![002](CATopalian_NWJS_TensorFlow_JS_Image_Classifier/v003/src/media/textures/screenshots/002.webp)
