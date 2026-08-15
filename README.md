@@ -14,7 +14,7 @@ To run this application we:
 * Download NW.js
 * Extract All
 * Find the nw.exe icon
-* Drag the folder named v001 onto the nw.exe icon  
+* Drag the folder named **v003** onto the **nw.exe** icon  
 
 Full Instructions on Running our app here: https://github.com/ChristopherAndrewTopalian/CATopalian_JavaScript_NW.js
 
@@ -59,7 +59,7 @@ Video: https://www.youtube.com/watch?v=sw3dFA14aW8
 2. Choose Download ZIP
 3. Save the Zip File
 4. Extract All
-5. Drag the folder named v001 onto the nw.exe icon 
+5. Drag the folder named **v003** onto the **nw.exe** icon 
 
 ---
 
