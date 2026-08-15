@@ -1,0 +1,123 @@
+<!-- Dedicated to God the Father -->
+<!-- All Rights Reserved Christopher Andrew Topalian Copyright 2000-2026 -->
+<!-- https://github.com/ChristopherTopalian -->
+<!-- https://github.com/ChristopherAndrewTopalian -->
+<!-- CATopalian_NWJS_TensorFlowJS.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title> CATopalian NWJS TensorFlowJS </title>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+
+body
+{
+    background-color: rgb(30, 30, 30);
+    color: white;
+    font-family: sans-serif;
+}
+
+</style>
+
+<!-- TensorFlow & MobileNet Libraries -->
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet"></script>
+
+<script>
+
+// shortcuts.js
+
+function ge(whichId)
+{
+    let result = document.getElementById(whichId);
+    return result;
+}
+
+function ce(whichType)
+{
+    let result = document.createElement(whichType);
+    return result;
+}
+
+function ba(whichElement)
+{
+    let result = document.body.append(whichElement);
+    return result;
+}
+
+function cl(whichMessage)
+{
+    let result = console.log(whichMessage);
+    return result;
+}
+
+let dogKeywords = ["terrier", "retriever", "spaniel", "hound", "poodle", "shepherd", "bulldog", "collie", "dog", "puppy"];
+
+async function runClassification(imgElement, outputElement)
+{
+    // load the model
+    let model = await mobilenet.load();
+
+    // classify the image object passed from makeInterface
+    let predictions = await model.classify(imgElement);
+
+    // map against keywords
+    let dogMatches = predictions.filter(p => dogKeywords.some(k => p.className.toLowerCase().includes(k)));
+
+    // print results to the DOM
+    outputElement.textContent = JSON.stringify(predictions, null, 2) + "\n\n" + (dogMatches.length ? "DOG DETECTED" : "No dog detected");
+}
+
+function makeInterface()
+{
+    // create title
+    let imageTitle = ce("h2");
+    imageTitle.textContent = "Test Image";
+    ba(imageTitle);
+
+    // create image
+    let myImage = ce("img");
+    myImage.id = "myImage";
+    myImage.src = "textures/retriever_004.jpg"; 
+    myImage.width = 300;
+    ba(myImage);
+
+    // create predictions title
+    let predictionsTitle = ce("h2");
+    predictionsTitle.textContent = "Predictions";
+    ba(predictionsTitle);
+
+    // create output container
+    let output = ce("pre");
+    output.id = "output";
+    output.textContent = "Loading model...";
+    ba(output);
+
+    // wait for the new image to fully load before running AI
+    myImage.onload = function()
+    {
+        runClassification(myImage, output);
+    };
+}
+
+function whenLoaded()
+{
+    makeInterface();
+}
+
+</script>
+
+</head>
+
+<body onload = "whenLoaded()">
+
+</body>
+
+</html>
+

@@ -1,0 +1,266 @@
+<!-- Dedicated to God the Father -->
+<!-- All Rights Reserved Christopher Andrew Topalian Copyright 2000-2026 -->
+<!-- https://github.com/ChristopherTopalian -->
+<!-- https://github.com/ChristopherAndrewTopalian -->
+<!-- CATopalian_NWJS_TensorFlowJS.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title> CATopalian NWJS TensorFlowJS </title>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+
+body
+{
+    background-color: rgb(30, 30, 30);
+    color: white;
+    font-family: sans-serif;
+    margin: 0;
+    overflow: hidden; /* we will handle scrolling in the flex containers */
+}
+
+/* style the scrollbar for dark mode */
+::-webkit-scrollbar {
+    width: 8px;
+}
+::-webkit-scrollbar-track {
+    background: rgb(20, 20, 20);
+}
+::-webkit-scrollbar-thumb {
+    background: rgb(80, 80, 80);
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: rgb(120, 120, 120);
+}
+
+</style>
+
+<!-- TensorFlow & MobileNet Libraries -->
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet"></script>
+
+<script>
+
+// Node.js File System Modules for NWJS
+let fs = require('fs');
+let path = require('path');
+
+// shortcuts.js
+function ge(whichId)
+{
+    let result = document.getElementById(whichId);
+    return result;
+}
+
+function ce(whichType)
+{
+    let result = document.createElement(whichType);
+    return result;
+}
+
+function ba(whichElement)
+{
+    let result = document.body.append(whichElement);
+    return result;
+}
+
+function cl(whichMessage)
+{
+    let result = console.log(whichMessage);
+    return result;
+}
+
+let dogKeywords = ["terrier", "retriever", "spaniel", "hound", "poodle", "shepherd", "bulldog", "collie", "dog", "puppy"];
+
+// reads the local textures folder and returns an array of image filenames
+function getTextureFiles()
+{
+    let files = [];
+    try
+    {
+        // read directory synchronously
+        let allFiles = fs.readdirSync('textures');
+
+        let allowedExts = ['.png', '.jpg', '.jpeg', '.webp', '.gif', '.bmp'];
+
+        // filter for image extensions
+        files = allFiles.filter(file => {
+            let ext = path.extname(file).toLowerCase();
+            return allowedExts.includes(ext);
+        });
+    }
+    catch (err)
+    {
+        cl("Error reading textures folder. Make sure the 'textures' folder exists. " + err);
+    }
+    return files;
+}
+
+async function runClassification(imgElement, outputElement, statusElement)
+{
+    statusElement.textContent = "Analyzing image...";
+    statusElement.style.color = "yellow";
+
+    // load the model
+    let model = await mobilenet.load();
+
+    // classify the image object
+    let predictions = await model.classify(imgElement);
+
+    // map against keywords
+    let dogMatches = predictions.filter(p => dogKeywords.some(k => p.className.toLowerCase().includes(k)));
+
+    // update the large title
+    if (dogMatches.length > 0)
+    {
+        statusElement.textContent = "DOG DETECTED";
+        statusElement.style.color = "lightgreen";
+    }
+    else
+    {
+        statusElement.textContent = "NO DOG DETECTED";
+        statusElement.style.color = "salmon";
+    }
+
+    // print json results to the DOM
+    outputElement.textContent = JSON.stringify(predictions, null, 2);
+}
+
+function makeInterface()
+{
+    // Main Layout Wrapper
+    let wrapper = ce("div");
+    wrapper.style.display = "flex";
+    wrapper.style.flexDirection = "row";
+    wrapper.style.height = "100vh";
+    ba(wrapper);
+
+    // Left Column: Image Menu
+    let leftMenu = ce("div");
+    leftMenu.style.display = "flex";
+    leftMenu.style.flexDirection = "column";
+    leftMenu.style.width = "250px";
+    leftMenu.style.minWidth = "250px";
+    leftMenu.style.padding = "10px";
+    leftMenu.style.gap = "15px";
+    leftMenu.style.overflowY = "auto";
+    leftMenu.style.borderRight = "2px solid #555";
+    leftMenu.style.backgroundColor = "rgb(20, 20, 20)";
+    wrapper.append(leftMenu);
+
+    // Right Column: Display & Output
+    let rightContent = ce("div");
+    rightContent.style.display = "flex";
+    rightContent.style.flexDirection = "column";
+    rightContent.style.padding = "20px";
+    rightContent.style.flexGrow = "1";
+    rightContent.style.overflowY = "auto";
+    wrapper.append(rightContent);
+
+    // Right Side Elements
+    let mainImage = ce("img");
+    mainImage.id = "mainImage";
+    mainImage.style.maxWidth = "100%";
+    mainImage.style.maxHeight = "400px";
+    mainImage.style.objectFit = "contain";
+    mainImage.style.backgroundColor = "black";
+    mainImage.style.border = "1px solid #777";
+    rightContent.append(mainImage);
+
+    let statusTitle = ce("h1");
+    statusTitle.id = "statusTitle";
+    statusTitle.textContent = "Select an image...";
+    statusTitle.style.marginTop = "20px";
+    rightContent.append(statusTitle);
+
+    let output = ce("pre");
+    output.id = "output";
+    output.textContent = "";
+    output.style.backgroundColor = "rgb(20, 20, 20)";
+    output.style.padding = "15px";
+    output.style.borderRadius = "5px";
+    output.style.border = "1px solid #555";
+    rightContent.append(output);
+
+    // wait for the new image to fully load before running AI
+    mainImage.onload = function()
+    {
+        // only run if an image is actually loaded
+        if (mainImage.getAttribute("src"))
+        {
+            runClassification(mainImage, output, statusTitle);
+        }
+    };
+
+    // Populate the Left Menu
+    let files = getTextureFiles();
+    
+    if (files.length > 0)
+    {
+        for (let i = 0; i < files.length; i++)
+        {
+            let imgPath = "textures/" + files[i];
+            
+            let thumb = ce("img");
+            thumb.src = imgPath;
+            thumb.title = files[i];
+            thumb.style.width = "100%";
+            thumb.style.cursor = "pointer";
+            thumb.style.borderRadius = "5px";
+            thumb.style.border = "2px solid transparent";
+            thumb.style.transition = "border 0.2s";
+
+            // hover effect
+            thumb.onmouseover = function()
+            {
+                thumb.style.border = "2px solid white";
+            };
+            thumb.onmouseout = function()
+            {
+                thumb.style.border = "2px solid transparent";
+            };
+
+            // click event to load image to the right side
+            thumb.onclick = function()
+            {
+                statusTitle.textContent = "Loading image...";
+                statusTitle.style.color = "white";
+                output.textContent = "";
+                mainImage.src = imgPath;
+            };
+            
+            leftMenu.append(thumb);
+        }
+
+        // load the first image automatically on startup
+        mainImage.src = "textures/" + files[0];
+    }
+    else
+    {
+        let noFilesMsg = ce("p");
+        noFilesMsg.textContent = "No images found in the textures folder.";
+        leftMenu.append(noFilesMsg);
+    }
+}
+
+function whenLoaded()
+{
+    makeInterface();
+}
+
+</script>
+
+</head>
+
+<body onload = "whenLoaded()">
+
+</body>
+
+</html>
+
